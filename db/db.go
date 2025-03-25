@@ -9,6 +9,7 @@ import (
 type Request struct {
 	ID        int
 	UserID    string
+	Username  string
 	Message   string
 	Timestamp string
 }
@@ -25,6 +26,7 @@ func InitDB() error {
 	createTableSQL := `CREATE TABLE IF NOT EXISTS requests (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id TEXT NOT NULL,
+		username TEXT NOT NULL,
 		message TEXT NOT NULL,
 		timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
@@ -33,14 +35,14 @@ func InitDB() error {
 	return err
 }
 
-func InsertRequest(userID, message string) error {
-	query := `INSERT INTO requests (user_id, message) VALUES (?, ?)`
-	_, err := db.Exec(query, userID, message)
+func InsertRequest(userID, username, message string) error {
+	query := `INSERT INTO requests (user_id, username, message) VALUES (?, ?, ?)`
+	_, err := db.Exec(query, userID, username, message)
 	return err
 }
 
 func GetAllRequests() ([]Request, error) {
-	rows, err := db.Query(`SELECT id, user_id, message, timestamp FROM requests ORDER BY timestamp DESC`)
+	rows, err := db.Query(`SELECT id, user_id, username, message, timestamp FROM requests ORDER BY timestamp`)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +51,7 @@ func GetAllRequests() ([]Request, error) {
 	var requests []Request
 	for rows.Next() {
 		var req Request
-		err := rows.Scan(&req.ID, &req.UserID, &req.Message, &req.Timestamp)
+		err := rows.Scan(&req.ID, &req.UserID, &req.Username, &req.Message, &req.Timestamp)
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +61,7 @@ func GetAllRequests() ([]Request, error) {
 }
 
 func GetRequestId(id int) (*Request, error) {
-	query := `SELECT id, user_id, message, timestamp FROM requests WHERE id = ?`
+	query := `SELECT id, user_id, username, message, timestamp FROM requests WHERE id = ?`
 	row := db.QueryRow(query, id)
 	
 	var req Request
@@ -74,7 +76,7 @@ func GetRequestId(id int) (*Request, error) {
 }
 
 func GetRequestsByUserID(userID string) ([]Request, error) {
-  query := `SELECT id, user_id, message, timestamp FROM requests WHERE user_id = ?`
+  query := `SELECT id, user_id, username, message, timestamp FROM requests WHERE user_id = ?`
   rows, err := db.Query(query, userID)
 
   if err != nil {
