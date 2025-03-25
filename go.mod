@@ -1,5 +1,4 @@
-
-module main
+module github.com/4epuha1337/botick
 
 go 1.21
 
