@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/4epuha1337/botick/db"
+	"github.com/4epuha1337/botick/db"
 	"github.com/4epuha1337/botick/tools"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"os"
 	"strings"
+	"strconv"
 )
 
 var IntroStr = `Здравствуйте, я бот, который <вставить, можно несколько строк>`
 var AddReqStr = `Опишите вашу проблему.`
+var AddReqDoneStr = `Ваше обращение будет рассмотрено в ближайшее время.`
 
 var IsAddReq = false
 
@@ -23,6 +25,10 @@ func main() {
 	}
 
 	bot.Debug = true
+	err = db.InitDB()
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("Authorized on account %s\n", bot.Self.UserName)
 	updateConfig := tgbotapi.NewUpdate(0)
@@ -34,7 +40,17 @@ func main() {
 	for update := range updates {
 		if IsAddReq {
 			text := update.Message.Text
-			
+			userid := update.Message.From.ID
+			useridStr:= strconv.Itoa(int(userid))
+			username := update.Message.From.UserName
+			db.InsertRequest(useridStr, username, text)
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, AddReqDoneStr)
+			if _, err := bot.Send(msg); err != nil {
+				fmt.Printf("Error sending message: %v\n", err)
+				errorMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, there was an error processing your message")
+				bot.Send(errorMsg)
+				continue
+			}
 			continue
 		}
 		
@@ -74,6 +90,7 @@ func main() {
 			continue
 		}
 		IsAddReq = true
+		continue
 	}
 		
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
