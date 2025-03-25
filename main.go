@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/4epuha1337/botick/db"
+	_ "github.com/4epuha1337/botick/db"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"os"
 	"strings"
