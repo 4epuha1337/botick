@@ -1,4 +1,4 @@
-module github.com/4epuha1337/botick
+module github.com/4epuha1337/botick/db
 
 go 1.21.13
 
