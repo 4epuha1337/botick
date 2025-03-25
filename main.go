@@ -44,6 +44,7 @@ func main() {
 			useridStr:= strconv.Itoa(int(userid))
 			username := update.Message.From.UserName
 			db.InsertRequest(useridStr, username, text)
+			IsAddReq = false
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, AddReqDoneStr)
 			if _, err := bot.Send(msg); err != nil {
 				fmt.Printf("Error sending message: %v\n", err)
@@ -74,6 +75,16 @@ func main() {
 		if strings.HasPrefix(text, "/requests") {
 			if tools.IsAdmin(update.Message.From.ID) {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Current requests:\n")
+				requests, err := db.GetAllRequests()
+				if err != nil {
+					fmt.Printf("Error getting requests: %v\n", err)
+					errorMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, there was an error processing your message")
+					bot.Send(errorMsg)
+					continue
+				}
+				for _, req := range requests {
+					msg.Text += fmt.Sprintf("%d. @%s: %s\n", req.ID, req.Username, req.Message)
+				}
 				if _, err := bot.Send(msg); err != nil {
 					panic(err)
 				}

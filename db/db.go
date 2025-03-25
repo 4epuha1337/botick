@@ -42,7 +42,7 @@ func InsertRequest(userID, username, message string) error {
 }
 
 func GetAllRequests() ([]Request, error) {
-	rows, err := db.Query(`SELECT id, user_id, username, message, timestamp FROM requests ORDER BY timestamp DESC`)
+	rows, err := db.Query(`SELECT id, user_id, username, message, timestamp FROM requests ORDER BY timestamp`)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func GetAllRequests() ([]Request, error) {
 	var requests []Request
 	for rows.Next() {
 		var req Request
-		err := rows.Scan(&req.ID, &req.UserID, &req.Message, &req.Timestamp)
+		err := rows.Scan(&req.ID, &req.UserID, &req.Username, &req.Message, &req.Timestamp)
 		if err != nil {
 			return nil, err
 		}
